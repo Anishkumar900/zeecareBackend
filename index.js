@@ -3,6 +3,7 @@ import cloudinary from "cloudinary"
 
 // import { config } from 'dotenv';
 // config ({Path:'./config/config.env'});
+const PORT=process.env.PORT || 4001;
 
 cloudinary.v2.config({
     cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,7 +11,7 @@ cloudinary.v2.config({
     api_secret:process.env.CLOUDINARY_API_SECRET
 })
 
-app.listen(process.env.PORT,()=>{
-    console.log(`server is running ${process.env.PORT}`);
+app.listen(PORT,()=>{
+    console.log(`server is running ${PORT}`);
     // console.log(process.env.USER);
 })
