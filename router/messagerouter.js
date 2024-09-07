@@ -8,6 +8,11 @@ import {allappointment} from '../controller/allappointmentController.js'
 import {forgotPassword,verifyOtpPassword,resetPassword} from '../controller/forgotPasswordController.js';
 import {editProfile,editUpadtedProfile} from '../controller/editProfileController.js';
 import {deleteAppointment} from '../controller/deleteAppointmentController.js';
+import {profilePhotoUpdate} from '../controller/profilePhotoUpdateController.js';
+import {upload} from '../middleware/uploadMiddleware.js';
+import {profilePhotoRemove} from '../controller/profilePhotoRemoveController.js';
+// import multer from 'multer';
+// const upload = multer({dest: 'uploads/'}) // Multer instance
 
 
 
@@ -23,7 +28,9 @@ router.post('/reset-password',resetPassword);
 router.post('/edit-profile',editProfile);
 router.post('/editUpdated-profile',editUpadtedProfile)
 router.post('/deleteAppointment',deleteAppointment)
-
+router.post('/profilePhoto-update',upload.single('image'),profilePhotoUpdate);
+// router.post('/profilePhoto-update',upload.single('image'),profilePhotoUpdate);
+router.post('/profilePhoto-remove',profilePhotoRemove)
 
 
 export { router };

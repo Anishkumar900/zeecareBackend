@@ -66,6 +66,10 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    imageFile :{
+        // type: Buffer
+        type:String
+    }
 });
 
 // Custom validation to check if password and confirmPassword match and hash password
