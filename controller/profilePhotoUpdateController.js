@@ -1,68 +1,60 @@
 import { Registration } from '../models/regitationSchema.js';
-import fs from 'fs';
-import path from 'path';
+// import fs from 'fs';
+// import path from 'path';
+import express from 'express';
+import fileUpload from 'express-fileupload';
+import cloudinary from 'cloudinary';
+
+const app = express();
 
 
-const profilePhotoUpdate =async (req, res) => {
-    // console.log(req.body); // Check if other form fields are being received
-    // console.log(req.file); // This should contain the file details if upload is successful
 
-    removePhoto(req.body.email);
+cloudinary.v2.config({
+    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:process.env.CLOUDINARY_API_KEY,
+    api_secret:process.env.CLOUDINARY_API_SECRET
 
-    if (!req.file) {
-        return res.status(400).send({ message: "No file uploaded." });
-    }
+})
 
-    // Assuming 'imageFile' is the field name in your schema
-    Registration.updateOne(
-        { email: req.body.email },
-        { $set: { imageFile: req.file.path } } // Save the path to the file
-    )
-    .then(data => {
-        res.send({ message: "Profile photo updated successfully" });
-    })
-    .catch(error => {
-        console.error(error);
-        res.status(500).send({ message: "Error updating profile photo" });
-    });
-}
-
-export { profilePhotoUpdate };
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  }));
 
 
-const removePhoto = async (email) => {
+  const profilePhotoUpdate = async (req, res) => {
     try {
-        // Find the user by email
-        const user = await Registration.findOne({ email });
-
-        // Check if user is found
-        if (!user) {
-            console.error('User not found');
-            return;
+        // Check if file is provided
+        if (!req.files || !req.files.image) {
+            return res.status(400).send({ message: 'No file uploaded' });
         }
 
-        // Get the image file path
-        const imagePath = user.imageFile;
-        // console.log('Image Path:', imagePath);
+        const file = req.files.image;
 
-        if (imagePath) {
-            // Define the full path to the file
-            const filePath = path.join('uploads', path.basename(imagePath));
-            // console.log('File Path:', filePath);
+        // Upload the file to Cloudinary
+        const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+            folder: 'zeecare/profilephoto' // Specify the folder name
+        });
 
-            // Remove the photo file from the uploads directory
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    // console.error('Error deleting file:', err);
-                } else {
-                    // console.log('File successfully deleted.');
-                }
-            });
-        } else {
-            // console.log('No image path to remove');
+        // Update the user's profile with the Cloudinary URL
+        const updateResult = await Registration.updateOne(
+            { email: req.body.email },
+            { $set: { imageFile: result.secure_url } } // Save the URL of the file
+        );
+
+        if (updateResult.nModified === 0) {
+            return res.status(404).send({ message: 'User not found or image is the same' });
         }
+
+        // Send a successful response
+        res.status(200).send({ message: 'Photo uploaded and profile updated successfully', url: result.secure_url });
+
     } catch (error) {
-        // console.error('Error:', error);
+        // Handle and log the error
+        console.error('Error updating profile:', error);
+        res.status(500).send({ message: 'Internal server error', error: error.message });
     }
 };
+
+export { profilePhotoUpdate };
 
