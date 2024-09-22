@@ -1,9 +1,9 @@
+import { AdminRegistration } from '../models/adminregitationSchema.js';
 import nodemailer from 'nodemailer';
-import { OtpPassword } from '../models/otpPasswordSchema.js';
 import { config } from 'dotenv';
-config ({Path:'./config/config.env'});
+config({ path: './config/config.env' }); // Use lowercase 'path'
 
-// Create transporter object with SMTP transport
+// Create a transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
@@ -15,8 +15,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-
-// Generate OTP and expiration time
+// Generate a 6-digit OTP and set its expiration time
 const generateOtp = () => {
     const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
@@ -26,17 +25,12 @@ const generateOtp = () => {
     };
 };
 
-// Helper function to capitalize and trim names
-const capitalizeAndTrim = (str) => {
-    return str.trim().charAt(0).toUpperCase() + str.trim().slice(1).toLowerCase();
-};
-
-// Format expiration time to a readable string
+// Format expiration time for better readability
 const formatExpirationTime = (expiresAt) => {
-    return expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return expiresAt.toLocaleTimeString(); // Adjust format as needed
 };
 
-// HTML content for the email
+// Create HTML content for the email
 const htmlContent = (fullName, otp, expiresAt) => `
     <html>
     <head>
@@ -62,11 +56,13 @@ const htmlContent = (fullName, otp, expiresAt) => `
             .header {
                 background: #4a90e2;
                 color: #fff;
-                padding: 15px;
+                padding: 20px;
                 text-align: center;
                 border-radius: 8px 8px 0 0;
                 position: relative;
                 z-index: 1;
+                font-size: 24px;
+                font-weight: bold;
             }
             .header::before {
                 content: "";
@@ -74,11 +70,11 @@ const htmlContent = (fullName, otp, expiresAt) => `
                 top: 50%;
                 left: -50%;
                 width: 200%;
-                height: 300%;
+                height: 200%;
                 background: rgba(255, 255, 255, 0.2);
                 border-radius: 50%;
                 transform: translateY(-50%);
-                animation: rotateBg 30s linear infinite;
+                animation: rotateBg 60s linear infinite;
                 z-index: -1;
             }
             @keyframes rotateBg {
@@ -94,11 +90,23 @@ const htmlContent = (fullName, otp, expiresAt) => `
                 line-height: 1.6;
                 text-align: center;
             }
-            .footer {
-                font-size: 0.9em;
-                color: #555;
-                text-align: center;
-                margin-top: 20px;
+            .highlight {
+                color: #4a90e2;
+                font-weight: bold;
+                font-size: 24px;
+                display: inline-block;
+                animation: bounce 1.5s infinite;
+            }
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-20px);
+                }
+                60% {
+                    transform: translateY(-10px);
+                }
             }
             .button {
                 display: inline-block;
@@ -108,36 +116,37 @@ const htmlContent = (fullName, otp, expiresAt) => `
                 background: #28a745;
                 text-decoration: none;
                 border-radius: 5px;
-                margin-top: 10px;
-                transition: background 0.3s ease;
+                margin-top: 20px;
+                transition: background 0.3s ease, transform 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
             .button:hover {
                 background: #218838;
+                transform: scale(1.05);
             }
-            .highlight {
+            .button:active {
+                transform: scale(0.98);
+            }
+            .footer {
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                margin-top: 20px;
+            }
+            .footer a {
                 color: #4a90e2;
+                text-decoration: none;
                 font-weight: bold;
-                font-size: 24px;
-                display: inline-block;
-                animation: bounce 1s infinite;
             }
-            @keyframes bounce {
-                0%, 20%, 50%, 80%, 100% {
-                    transform: translateY(0);
-                }
-                40% {
-                    transform: translateY(-30px);
-                }
-                60% {
-                    transform: translateY(-15px);
-                }
+            .footer a:hover {
+                text-decoration: underline;
             }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>Welcome to ZeeCare!</h1>
+                Welcome to ZeeCare!
             </div>
             <div class="content">
                 <p>Hello <span class="highlight">${fullName}</span>,</p>
@@ -159,43 +168,31 @@ const htmlContent = (fullName, otp, expiresAt) => `
     </html>
 `;
 
-// Function to send the email
-const sendMailForForgotPassword = async (firstName, lastName, email) => {
-    // Capitalize and format the full name
-    const formattedFirstName = capitalizeAndTrim(firstName);
-    const formattedLastName = capitalizeAndTrim(lastName);
-    const fullName = `${formattedFirstName} ${formattedLastName}`;
 
-    // Generate OTP and expiration time
+// Send OTP email to user
+const sendOtpToUser = async (username) => {
     const { otp, expiresAt } = generateOtp();
+    const fullName = "Anish Kumar"; // Ideally, this should be fetched dynamically based on the username
 
     try {
         const info = await transporter.sendMail({
             from: `"ZeeCare Team" <${process.env.USER}>`, // sender address
-            to: email, // recipient address
+            to: "anishunique900@gmail.com", // recipient address (consider making this dynamic)
             subject: "Your OTP for Password Change", // Subject line
             text: `Hello ${fullName},\n\nYou requested to change your password. Your OTP is ${otp}. It will expire at ${formatExpirationTime(expiresAt)}.\n\nIf you did not request this change, please ignore this email.\n\nBest regards,\nZeeCare Team`, // plain text body
             html: htmlContent(fullName, otp, expiresAt), // HTML body
         });
 
-        const otpemail = await OtpPassword.findOne({ email });
+        const otpemail = await AdminRegistration.findOne({ username });
         if (otpemail) {
+            // console.log(otpemail)
             otpemail.otp = otp;
             otpemail.expiresAt = expiresAt;
             await otpemail.save();
         }
-        else {
-            const newOtpPassword = new OtpPassword({
-                email: email,
-                otp: otp,
-                expiresAt: expiresAt
-            });
-            await newOtpPassword.save();
-        }
-        // console.log("Message sent:", info.messageId); // Log message ID
     } catch (error) {
         console.error('Error sending email:', error); // Log error
     }
 }
 
-export { sendMailForForgotPassword };
+export { sendOtpToUser };

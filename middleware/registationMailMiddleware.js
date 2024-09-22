@@ -85,7 +85,7 @@ const sendMail = async (firstName, lastName, email, phone, password) => {
                 </div>
                 <div class="footer">
                     <p>If you have any questions, feel free to contact us:</p>
-                    <p>Email: <a href="mailto:anishunique900@gmail.com">anishunique900@gmail.com</a></p>
+                    <p>Email: <a href="mailto:hit19ece.anishkumar@gmail.com">hit19ece.anishkumar@gmail.com</a></p>
                     <p>Phone: <a href="tel:+917903461477">+91 7903461477</a></p>
                     <p>Best regards,</p>
                     <p>The ZeeCare Team</p>

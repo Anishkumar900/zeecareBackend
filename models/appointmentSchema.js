@@ -53,14 +53,21 @@ const appointmentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'cancelled'],
+        enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
     deleted:{
         type: Boolean,
         default: false
+    },
+    appointmentNumbar:{
+        type: String,
+        required: true,
+        unique: true,
+
     }
-}, {
+}, 
+{
     timestamps: true
 })
 
