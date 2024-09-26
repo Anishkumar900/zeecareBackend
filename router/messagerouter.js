@@ -13,6 +13,7 @@ import {profilePhotoUpdate} from '../controller/profilePhotoUpdateController.js'
 import {profilePhotoRemove} from '../controller/profilePhotoRemoveController.js';
 // import multer from 'multer';
 // const upload = multer({dest: 'uploads/'}) // Multer instance
+import {alldoctor} from '../controller/alldoctorController.js'
 
 
 
@@ -30,7 +31,8 @@ router.post('/editUpdated-profile',editUpadtedProfile)
 router.post('/deleteAppointment',deleteAppointment)
 // router.post('/profilePhoto-update',upload.single('image'),profilePhotoUpdate);
 router.post('/profilePhoto-update',profilePhotoUpdate);
-router.post('/profilePhoto-remove',profilePhotoRemove)
+router.post('/profilePhoto-remove',profilePhotoRemove);
+router.get('/alldoctor',alldoctor)
 
 
 export { router };
